@@ -453,6 +453,8 @@ namespace OmniLinkBridge.MQTT
 
             ret.unique_id = $"{Global.mqtt_prefix}thermostat{thermostat.Number}";
             ret.name = Global.mqtt_discovery_name_prefix + thermostat.Name;
+
+            ret.action_topic = thermostat.ToTopic(Topic.current_operation);
             ret.current_temperature_topic = thermostat.ToTopic(Topic.current_temperature);
 
             ret.temperature_low_state_topic = thermostat.ToTopic(Topic.temperature_heat_state);
@@ -474,12 +476,10 @@ namespace OmniLinkBridge.MQTT
 
         public static string ToOperationState(this clsThermostat thermostat)
         {
-            string status = thermostat.HorC_StatusText();
-
-            if (status.Contains("COOLING"))
-                return "cool";
-            else if (status.Contains("HEATING"))
-                return "heat";
+            if (thermostat.HorC_Status.IsBitSet(0))
+                return "heating";
+            else if (thermostat.HorC_Status.IsBitSet(1))
+                return "cooling";
             else
                 return "idle";
         }
